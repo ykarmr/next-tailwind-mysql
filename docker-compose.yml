@@ -1,0 +1,32 @@
+version: '3'
+services:
+  webapp:
+    container_name: webapp
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+    build: .
+    ports:
+      # webapp
+      - '3000:3000'
+      # prisma studio
+      - '5555:5555'
+      # storybook
+      - '6006:6006'
+    tty: true
+    volumes:
+      - ./webapp:/usr/src/webapp
+    command: yarn dev
+    links:
+      - db
+  db:
+    image: mysql
+    container_name: mysql
+    # MySQL8.0でのデフォルトの認証方式が「caching_sha2_password」なので変更する
+    # 設定しないと "The server requested authentication method unknown to the client" とエラーになる
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=root
+    ports:
+      - 3306:3306
